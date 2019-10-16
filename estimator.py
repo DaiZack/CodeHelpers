@@ -4,7 +4,7 @@ def estimator(data, features, target, groupby='', quantile=0.9, corr=False):
     option = list(set(data[groupby]))
     newdata = pd.DataFrame()
     for op in option:
-      subdata =  data[data['Industry']==op]
+      subdata =  data[data[groupby]==op]
       scaleddata = (subdata[features]-subdata[features].min())/(subdata[features].max()-subdata[features].min())
       scores = scaleddata.agg("mean", axis="columns")
       if subdata[target].quantile(quantile) >2:

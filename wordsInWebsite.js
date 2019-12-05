@@ -62,20 +62,9 @@ var checksite =async (url, keywords)=>{
     }
   })
 
-  // for (l of links){
-  //   var p = await checkpage(l,keywords)
-  //   console.log(p)
-  // }
   var out = await Promise.all(links.map(async (l)=>checkpage(l, keywords)))
   console.log(_.flatten(out))
 };
 
 checksite('https://rel8ed.to/', keywords)
-// checkpage('http://ibm.com', keywords).then(console.log)
-// let keyword = ['bc','ab']
-// keyword = keyword.map(x=>'\\b'+x+'\\b')
-// console.log(keyword)
-// let pattern =new RegExp(keyword.join('|','gi'));
-// console.log(pattern)
-// var test = 'abc bc'.match(pattern)
-// console.log(test)
+

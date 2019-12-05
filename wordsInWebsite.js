@@ -61,10 +61,12 @@ var checksite =async (url, keywords)=>{
       links.push(href)
     }
   })
-
+  links = _.uniq(links)
   var out = await Promise.all(links.map(async (l)=>checkpage(l, keywords)))
-  console.log(_.flatten(out))
+  out = _.flatten(out)
+  out = out.filter(x=>x != null)
+  out = out.map(x=>x.replace(/\W/g,' ').trim().toLowerCase())
+  console.log(out)
 };
 
-checksite('https://rel8ed.to/', keywords)
-
+checksite('https://www.data-blue.com/', keywords)

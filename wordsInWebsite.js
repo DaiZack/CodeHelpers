@@ -3,7 +3,11 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 const _ = require('lodash');
 
-var keywords = fs.readFileSync('Vendor.txt').toString().split('\n');
+try{
+  var keywords = fs.readFileSync('keywords.txt').toString().split('\n');
+}catch{
+  var keywords = ['test','about','contact']
+}
 // console.log(keywords)
 
 var visibleText = (res)=>{

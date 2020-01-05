@@ -6,7 +6,7 @@ var filename = 'test.csv'
 
 async function sendmsg(q,msg){
     try{
-        var conn = await  amqplib.connect('amqp://localhost');
+        var conn = await  amqplib.connect('amqp://user:password@ip:port/node');
         var ch = await conn.createChannel()
         await ch.sendToQueue(q, Buffer.from(msg));
         await ch.close();

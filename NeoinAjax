@@ -1,0 +1,21 @@
+        async function cypher() {
+            query = 'MATCH (n:Corp) RETURN n.name limit 1'
+            var body = JSON.stringify({
+            statements: [{
+                statement: 'MATCH (n:Corp) RETURN n.name limit 1'
+                }]
+            });
+
+		var result = await $.ajax({
+  		    url: "http://10.8.0.102:7474/db/data/transaction/commit",
+  		    type: "POST",
+			data: JSON.stringify({statements: [{statement: query}]
+            }),
+			contentType: "application/json",
+			beforeSend: function (xhr) {
+				xhr.setRequestHeader ("Authorization", "Basic " + btoa("username"+ ":" + "password"));
+			}}
+            )
+        console.log(result)
+
+        }

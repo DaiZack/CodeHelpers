@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="size=device-size, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Data Entry</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/neo4j-driver"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script>
+        var driver = neo4j.driver(
+            'neo4j://localhost',
+            neo4j.auth.basic('user', 'passwd')
+        )
+        var session = driver.session()
+        const txc = session.beginTransaction()
+        $(function(){
+            $('input#website').bind('input',async function () {
+            var typeIn = document.getElementById("website").value
+            console.log(typeIn)
+            var result = await txc.run(
+                `match (w:Website) where w.url =~ '.*${typeIn}.*' with w limit 3 return collect(w.url) as url`
+            )
+            var availableTags = result.records[0].get('url');
+            console.log(availableTags)
+            $("#website").autocomplete({
+                source: availableTags
+            });
+            $('#candidate').text(JSON.stringify(availableTags))
+        });
+        })
+
+        async function search(type) {
+            var website = document.getElementById("website").value
+            console.log(website)
+            if (type == 'website') {
+                var query = `match (c:Corp)-[:REACHED_AT]->(w:Website) where w.url = "${website}" with c optional match (a:Address)-[:LOCATED_IN]-(c)-[:NAMED]->(n:CorpName)  return id(c) as corpid, n.name as corpname, a.addressLine+', '+a.city+', '+a.region as address`
+            }
+
+            console.log(query)
+            // var driver = neo4j.driver(
+            //     'neo4j://10.8.0.102',
+            //     neo4j.auth.basic('system', 'Xg6wF3eDKzsK<2=;')
+            // )
+            // var session = driver.session()
+            // const txc = session.beginTransaction()
+            const result1 = await txc.run(
+                query
+            )
+            console.log(result1.records)
+            $('input#website').val(result1.records[0].get('website'));
+            $('input#corpid').val(result1.records[0].get('corpid'));
+            $('input#corpName1').val(result1.records[0].get('corpname'));
+            $('input#address1').val(result1.records[0].get('address'))
+        }
+    </script>
+</head>
+
+<body>
+    <p>Corpid : <input type="text" id='corpid' size="40"><button onclick="search('id')">search</button></p>
+    <p>CorpName : <input type="text" id='corpName1' size="40"></p>
+    <p>Address : <input type="text" id='address1' size="40"></p>
+    <p>Website : <input type="text" id="website" size="40"><button onclick="search('website')">search</button><label id='candidate'></label></p>
+    
+
+</body>
+
+</html>

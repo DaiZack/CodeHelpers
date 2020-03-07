@@ -1,0 +1,234 @@
+<head>
+    <title>pds</title>
+    <style>
+        .grids {
+            padding-top: 2%;
+            padding-left: 10%;
+            display: grid;
+            grid-template-columns: auto auto;
+        }
+
+        .grids2 {
+            display: grid;
+            grid-template-columns: auto auto auto auto auto auto;
+        }
+
+        .grid {
+            padding: 5px;
+        }
+
+        label {
+            display: inline-block;
+            padding: 2px;
+            width: 80px;
+        }
+
+        .left {
+            left: 400px
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js">
+    </script>
+</head>
+
+<body>
+    <div style="padding:10px" align='center'>
+        <h3>NEO Free Style Search</h3>
+    </div>
+    <div class="grids">
+        <div class="grid">
+            <label class="inputs">Company</label><input type="text" class='Company' style='width: 500px'>
+        </div>
+        <div class="grid">
+            <label class="inputs">ID</label><input type="text" class='ID' style='width: 500px'>
+        </div>
+        <div class="grid">
+            <label class="inputs">Address</label><input type="text" class='Address' style='width: 500px'>
+        </div>
+        <div class="grid">
+            <label class="inputs">Website</label><input type="text" class='Website' style='width: 500px'>
+        </div>
+        <div class="grid">
+            <label class="inputs">Phone</label><input type="text" class='Phone' style='width: 500px'>
+        </div>
+    </div>
+    <div align="center" style="padding-top: 5%;" class='buttons'>
+        <button class="clear" onclick="cleanpage()">Clear</button>
+        <button class="Search" onclick="search()">Search</button>
+    </div>
+
+    <div id='addition' style="padding-left:10%">
+    </div>
+    <div style="padding-left:10%" class='grids2'>
+    </div>
+    <script>
+
+        $(document).keypress(function (event) {
+            var keycode = (event.keyCode ? event.keyCode : event.which);
+            if (keycode == '13') {
+                search()
+            }
+        });
+
+        async function cypher(query) {
+            var body = JSON.stringify({
+                statements: [{
+                    statement: query
+                }]
+            });
+            var result = await $.ajax({
+                url: 'http://10.8.0.102:7474/db/data/transaction/commit',
+                type: 'POST',
+                data: JSON.stringify({
+                    statements: [{ statement: query }]
+                }),
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('Authorization', 'Basic ' + btoa('system' + ':' + 'Xg6wF3eDKzsK<2=;'));
+                }
+            }
+            )
+            return result
+
+        };
+        var cleanpage = () => {
+            $('input').val('');
+            $('div#addition').empty();
+            $('div.grids2').empty();
+            $('.noResult').remove()
+        };
+
+        var neo2json = (result) => {
+            if (!result) {
+                return null;
+            }
+            if (result.errors.length > 0) {
+                alert(result.errors[0].message);
+                return null
+            }
+            if (result.results.length < 1) {
+                alert('no record found, please retry!');
+                return null
+            }
+            var results = result.results[0];
+            var outjson = [];
+            for (i = 0; i < results.data.length; i++) {
+                var line = {}
+                for (j = 0; j < results.columns.length; j++) {
+                    var col = results.columns[j];
+                    line[col] = results.data[i].row[j];
+                }
+                outjson.push(line)
+            }
+            return outjson
+        }
+
+        var neo2jsonT = (result) => {
+            if (!result) {
+                return null;
+            }
+            if (result.errors.length > 0) {
+                alert(result.errors[0].message);
+                return null
+            }
+            if (result.results.length < 1) {
+                alert('no record found, please retry!');
+                return null
+            }
+            var results = result.results[0];
+            var outjson = {};
+            for (j = 0; j < results.columns.length; j++) {
+                outjson[results.columns[j]] = []
+                for (i = 0; i < results.data.length; i++) {
+                    outjson[results.columns[j]].push(results.data[i].row[j])
+                }
+                outjson[results.columns[j]] = _.uniq(outjson[results.columns[j]])
+                outjson[results.columns[j]] = _.pull(outjson[results.columns[j]], null)
+            }
+            return outjson
+        }
+
+        var search = async () => {
+            querybase = " optional match (c)-[:LOCATED_IN]->(a:Address) optional match (c)-[:NAMED]->(n:CorpName) optional match (c)-[:REACHED_AT]->(w:Website) optional match (c)-[:NAMED]->(n:CorpName) optional match (c)-[:REACHED_AT]->(w:Website) optional match (c)-[:REACHED_AT]->(p:Phone)optional match (c)-[:CAT]->(ct:Category)  RETURN distinct id(c) as ID, n.name as Name, a.addressLine+', '+a.city+', '+a.region+', '+a.country as Address, p.phoneKey as Phone, w.url as Website, ct.code + ': ' +ct.categoryType+'_'+ ct.name as Cat limit 50"
+            $('div#addition').empty();
+            $('div.grids2').empty();
+            $('.noResult').remove()
+            var id = $('.ID').val()
+            var name = $('.Company').val()
+            var address = $('.Address').val()
+            var website = $('.Website').val()
+            var phone = $('.Phone').val()
+            var region = null;
+            if (address.length == 2) {
+                region = address.toUpperCase();
+            } else {
+                region = address.match(/[ ,]([A-Z]{2})[ ,]/)
+                if (region) {
+                    region = region[1]
+                }
+            }
+            var query = '';
+            if (id) {
+                if (id.match(/\D/g)) {
+                    alert('ID must be numbers!')
+                    $('.ID').val('')
+                    return
+                }
+                query = `MATCH (c:Corp) where id(c) = ${id} with c` + querybase;
+            } else {
+                if (name) {
+                    if (region) {
+                        query = `with '${name}' as nm CALL db.index.fulltext.queryNodes('corpAndPersonAndIDName', nm) YIELD node, score where score>9.99999 with node, score  match (node)<-[:NAMED]-(c:Corp)-[:LOCATED_IN]->(a0:Address) where a0.region = '${region}' with distinct c limit 20 ` + querybase
+                    } else {
+                        query = `with '${name}' as nm CALL db.index.fulltext.queryNodes('corpAndPersonAndIDName', nm) YIELD node, score where score>9.99999 with node, score  match (node)<-[:NAMED]-(c:Corp) with distinct c limit 20 ` + querybase
+                    }
+                } else {
+                    if (phone) {
+                        phone = phone.match(/\d+/g).join('')
+                        phone = '1-' + phone.slice(phone.length - 10, phone.length - 7) + '-' + phone.slice(phone.length - 7, phone.length)
+                        query = `match (p0:Phone)<-[:REACHED_AT]-(c:Corp) where p0.phoneKey = '${phone}' with distinct c limit 20 optional match (c)-[:LOCATED_IN]->(a:Address) ` + querybase
+                    }
+                    if (website) {
+                        website = website.replace(/^\W+https?:\/\//, '').replace(/^www\./, '').replace(/\/.+/, '')
+
+                        query = `match (w0:Website)<-[:REACHED_AT]-(c:Corp) where w0.url = '${website}' or w0.url contains '${website}'with distinct c limit 20 ` + querybase
+                    }
+                }
+            }
+
+            // console.log(query)
+            $('div#addition').append(`<p style='font-style: italic; color:deepskyblue'><strong style='color: black'>Query:  </strong><br>${query}</p>`)
+
+            var result = await cypher(query);
+            console.log(result)
+
+            if(result.results[0].data.length ==0){
+                $('div.buttons').after('<div class="noResult" align="center"><h3 style="color: darkred; padding-left=35%">No record found</h3></div>')
+            }
+            // var rjson = neo2json(result);
+            var tjson = neo2jsonT(result);
+            $('.ID').val(tjson.ID[0]);
+            $('.Company').val(tjson.Name[0]);
+            $('.Address').val(tjson.Address[0]);
+            $('.Website').val(tjson.Website[0]);
+            $('.Phone').val(tjson.Phone[0]);
+
+            // $('div#addition').append('<p>123</p>')
+
+            for (t of Object.keys(tjson)) {
+                // console.log(t);
+                // console.log(tjson[t])
+                if (tjson[t].length > 1) {
+                    var y = tjson[t].slice(1, tjson[t].length).join('<br>  ')
+                    $('div.grids2').append(`<div><p><strong>Additional ${t}:  </strong><br>${y}</p><div`)
+
+                }
+            }
+        }
+
+    </script>
+</body>

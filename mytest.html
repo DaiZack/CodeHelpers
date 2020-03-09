@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@1.0.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.0.2/dist/tfjs-vis.umd.min.js"></script>
+    <script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+    <title>Document</title>
+    <style>
+        #charts {
+            display: inline-block;
+            /* padding: 10px; */
+            margin: 4px;
+        }
+        .views{
+            display: grid;
+            grid-template-columns: 50% 50%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="step1" align='center'>
+        <h3>Tensorflow Demo</h3><br>
+        <h4>Use a simple graph</h4>
+
+        <label for="formula">Choose a type of data</label>
+        <select name="formula" class='formula'>
+            <option value="linear">linear</option>
+            <option value="ploynominal">ploynominal</option>
+        </select><br>
+        <button onclick="createData()">Generate Random Numbers</button><br><br>
+        <div class="views">
+            <div id="charts" class='sample data'></div>
+            <div id='history'></div>
+        </div>
+        
+    </div>
+
+    <div>
+
+        <div class="layers" align='center'>
+            <h3>Step 2 build model</h3>
+            <div class="layer" id='1'><strong>layer1 : </strong>
+                <label for="layer1">number of neural
+                    <input type="text" id='layer1' value="1"></label>
+                ><button onclick="addLayer()">addLayer</button>
+            </div>
+            <button class='createButton' onclick="createModel()">Create Model</button>
+        </div>
+        <div id="modelSummary"></div>
+
+    </div>
+
+    <div align='center'>
+        <h3>Step 3 Train the model</h3>
+        <label for="epochs">Number of epochs
+            <input type="text" class="epochs" value='20'></label>
+        <label for="batchSize">batchSize
+            <input type="text" class="batchSize" value='32'></label>
+        <label for="learnRate">Learning Rate
+            <input type="text" class="learnRate" value='0.0000000001'></label><br>
+        <button class="trainButton" onclick="train()">train</button>
+        
+    </div>
+
+    <script>
+        var x = null;
+        var y = null;
+        var model = null;
+        var lr = null;
+        var inputDim = 1;
+        function createData() {
+            x = [...Array(100).keys()];
+            x = x.map(x => x - 50)
+            var formula = $('.formula').children('option:selected').val();
+            if (formula == "ploynominal") {
+                y = x.map(n => n ** 2 + Math.random() * 200)
+                inputDim = 2
+                $('.learnRate').val('1e-8')
+            };
+            if (formula == "linear") {
+                y = x.map(n => 30 * n + 10 + Math.random() * 200)
+                $('.learnRate').val('1e-5')
+                inputDim = 1
+            };
+
+            var values = []
+            for (i = 0; i < 100; i++) {
+                values.push({ x: x[i], y: y[i] })
+            }
+            tfvis.render.scatterplot(document.getElementById('charts'),
+                { values, series: [formula] }, { width: 500, height: 200, xLabel: 'x', yLabel: 'y' })
+
+        };
+
+        function addLayer() {
+            var numOfLayers = $('.layer').length;
+            $('.createButton').before(`<div class='layer' id = '${numOfLayers + 1}'><strong> layer${numOfLayers + 1} : </strong><label for="layer1">number of neural
+                <input type="text" id='layer${numOfLayers + 1}' value="1"></label></label> <button onclick="addLayer()">addLayer</button></div >`)
+        }
+
+        function createModel() {
+            model = tf.sequential();
+            var numOfLayers = $('.layer').length;
+            for (i = 1; i < numOfLayers + 1; i++) {
+                var units = parseInt($(`input#layer${i}`).val())
+                if (i == 1) {
+                    model.add(tf.layers.dense({ inputShape: [inputDim], units: units, useBias: true }))
+                } else {
+                    model.add(tf.layers.dense({ units: units, useBias: true }))
+                }
+            }
+            model.add(tf.layers.dense({ units: 1, useBias: true, name: 'outputLayer' }))
+            $('modelSummary').empty()
+            tfvis.show.modelSummary(document.getElementById('modelSummary'), model);
+        }
+
+        async function train() {
+            lr = parseFloat($('.learnRate').val())
+            var batchSize = parseInt($('.batchSize').val());
+            var epochs =  parseInt($('.epochs').val());
+            console.log(lr)
+
+            var formula = $('.formula').children('option:selected').val();
+            var xt = tf.tensor2d(x, [x.length, 1]);
+            if (formula == "ploynominal") {
+                xt = tf.concat([xt, xt.square()], 1)
+            }
+            var yt = tf.tensor2d(y, [y.length, 1]);
+
+            model.compile({
+                optimizer: tf.train.sgd(lr),
+                loss: tf.losses.meanSquaredError,
+                metrics: ['mse']
+            })
+
+
+            var history = await model.fit(xt, yt, {
+                batchSize,
+                epochs,
+                shuffle: true,
+                callbacks: tfvis.show.fitCallbacks(
+                    document.getElementById('history'),
+                    ['loss'],
+                    { height: 200, callbacks: ['onEpochEnd'] }
+                )
+            })
+            predict()
+        }
+        
+
+        function predict(){
+            var xt = tf.tensor2d(x, [x.length, 1]);
+            var formula = $('.formula').children('option:selected').val();
+            if (formula == "ploynominal") {
+                xt = tf.concat([xt, xt.square()], 1)
+            }
+            var pred = model.predict(xt).dataSync()
+
+            var preddata = x.map((v,i)=>{return {x:v, y:pred[i]}})
+            var actual = x.map((v,i)=>{return {x:v, y:y[i]}})
+
+            tfvis.render.scatterplot(document.getElementById('charts'),
+                {values:[actual, preddata], series:['actual', 'prediction']}, 
+                { width: 500, height: 200, xLabel: 'x', yLabel: 'y' }
+            )
+        }
+
+    </script>
+
+</body>
+
+</html>

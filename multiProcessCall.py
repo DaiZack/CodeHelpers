@@ -1,7 +1,7 @@
 from py2neo import Graph 
 from multiprocessing import Pool
 
-g= Graph('bolt://10.8.0.102:7687', user='system', password='Xg6wF3eDKzsK<2=;')
+g= Graph('bolt://10.8.0.102:7687', user='', password='')
 regions = ['ON','QC','NS','NB','MB','BC','PE','SK','AB','NL','YK', 'YT', 'NT', 'NU']
 states = ['AK','AL','AR','AS','AZ','CA','CO','CT','DC','DE','FL','GA','HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME','MI','MN','MO','MP','MS','MT','NC','ND','NE','NH','NJ','NM','NV','NY','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VA','VT','WA','WI','WV','WY','VI','PR','GU','MH', 'FM']
 

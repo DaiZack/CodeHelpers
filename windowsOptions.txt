@@ -1,0 +1,5 @@
+1. Windows add right click option open folder in VScode with WSL (change lastline to vscode path)
+
+reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\WSLVSCode\command" /t REG_EXPAND_SZ /d "wsl.exe --cd '"%V"' code"
+reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\WSLVSCode" /t REG_EXPAND_SZ /d "Open in WSL VSCode"
+reg add "HKEY_CLASSES_ROOT\Directory\Background\shell\WSLVSCode" /v Icon /t REG_EXPAND_SZ /d "C:\Users\{user}\AppData\Local\Programs\Microsoft VS Code\Code.exe"

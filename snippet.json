@@ -1,0 +1,73 @@
+{
+	// Place your global snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and 
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope 
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is 
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are: 
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
+	// Placeholders with the same ids are connected.
+	// Example:
+	"Print to console": {
+		"scope": "python",
+		"prefix": "neo",
+		"body": [
+			"from py2neo import Graph \ng= Graph('bolt://10.8.0.$1:7687', user='system', password='Xg6wF3eDKzsK<2=;')"
+		],
+		"description": "insert neo credentials"
+	},
+	"Start Pyspark":{
+		"scope": "python",
+		"prefix": "spark",
+		"body": "import findspark\nfindspark.init()\nfrom pyspark.sql import SparkSession\nspark = SparkSession.builder.getOrCreate()",
+		"description": "start pyspark session"
+	},
+	"Scrape website":{
+		"scope": "python",
+		"prefix": "scrape",
+		"body": "import requests,re,json\nfrom lxml import html\nurl='$1'\ntry:\n\tres=requests.get(url)\n\tpage=html.fromstring(res.content)\nexcept Exception as e:\n\tprint(e)",
+		"description": "scrape a single page"
+	},
+	"Scrape website node":{
+		"scope": "javascript",
+		"prefix": "scrape",
+		"body": "const axios = require('axios');\nconst cheerio= require('cheerio');\n\nasync function scrape(url){\n\tvar res=await axios.get(url);\n\tvar $ = cheerio.load(res.data);\n\t$('a').each((_,a)=>{\n\t\tvar href = $(a).attr('href');\n\t\tconsole.log(href);\n})\n}\nasync function main(){\n\tawait scrape($1);\n}\n\nmain()",
+		"description": "scrape a single page"
+	},
+	"Jquery":{
+		"scope": "javascript,html",
+		"prefix": "jquery",
+		"body": "<script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>",
+		"description": "Jquery"
+	},
+	"axios cdn":{
+		"scope": "javascript,html",
+		"prefix": "axios",
+		"body": "<script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.min.js'></script>",
+		"description": "axios cdn"
+	},
+	"neo api":{
+		"scope": "javascript,html",
+		"prefix": "neoapi",
+		"body": "var query = 'MATCH (n:Corp) RETURN n.name limit 1'\nasync function cypher(query) {var body = JSON.stringify({\n            statements: [{\n                statement: query\n                }]\n            });\n\n		var result = await $.ajax({\n  		    url: 'http://10.8.0.102:7474/db/data/transaction/commit',\n  		    type: 'POST',\n			data: JSON.stringify({statements: [{statement: query}]\n            }),\n			contentType: 'application/json',\n			beforeSend: function (xhr) {\n				xhr.setRequestHeader ('Authorization', 'Basic ' + btoa('system'+ ':' + 'Xg6wF3eDKzsK<2=;'));\n			}}\n            )\n        console.log(result)\n\n        }",
+		"description": "axios cdn"
+	},
+	"lodash":{
+		"scope": "javascript, html",
+		"prefix": "lodash",
+		"body":"<script src='https://cdn.jsdelivr.net/npm/request@2.88.0/index.min.js'></script>",
+		"description": "lodash cdn"
+	},
+	"bokeh":{
+		"scope": "python",
+		"prefix": "bokeh",
+		"body":" #barchart\nfrom bokeh.plotting import figure, output_notebook, show, ColumnDataSource\nfrom bokeh.transform import factor_cmap\nfrom bokeh.palettes import Category10\n\noutput_notebook()\ntooltips = [('fruits','@fruits'),('count','@counts')]\nfruits = ['Apples', 'Pears', 'Nectarines', 'Plums', 'Grapes', 'Strawberries']\ncounts = [5, 3, 4, 2, 4, 6]\n\nsource = ColumnDataSource(data=dict(fruits=fruits, counts=counts))\n\np = figure(x_range=fruits, plot_height=250, title='Fruit Counts',\n           tools='pan,wheel_zoom,box_zoom,reset,save',\n           tooltips=tooltips)\np.vbar(x='fruits', top='counts', width=0.9, source=source, legend_field='fruits',\n       line_color='white', fill_color=factor_cmap('fruits', palette=Category10[10], factors=fruits))\n\np.xgrid.grid_line_color = None\np.y_range.start = 0\np.y_range.end = 9\np.legend.orientation = 'horizontal'\np.legend.location = 'top_center'\n\nshow(p)",
+		"description": "bokeh"
+	},
+	"pandas":{
+		"scope": "python",
+		"prefix": "pd",
+		"body":"pd",
+		"description": "pd"
+	}
+
+
+}

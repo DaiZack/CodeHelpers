@@ -1,2 +1,2 @@
 #!/bin/bash
-while read line;do wget -r --tries=1 -Q1m -p -U Mozilla -A .html,.php "$line";done <$1
+while read line;do wget -r --tries=1 -e robots=off -T 20 -Q2m -p -U Mozilla -A .html,.php "$line";done <$1

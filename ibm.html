@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src='https://code.jquery.com/jquery-3.4.1.min.js'></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light text-center">
+    <h3 class="text-center text-primary">Watson NLP tool</h3></nav>
+    <div class="container mt-5">
+
+        <div class="row">
+            <div class="col-6">
+                <div>
+                    <h5 class='text-success'>Use Link:</h5>
+                    <input type="text" value='' class='inputUrl' size=55>
+                    <button class="search">Search</button>
+                </div>
+                <hr>
+                <div>
+                    <h5 class='text-success'>Use Text:</h5>
+                    <textarea type="text" value='' class='inputText' rows=15 cols=60></textarea>
+
+                </div>
+                <div>
+                    <button class="searchText">Search</button>
+                </div>
+
+            </div>
+            <div class="col-6 border-left">
+                <h5 class='text-success'>Result:</h5>
+                <hr>
+                <pre class="result"></pre>
+                <div class="spinner-border text-primary invisible" role="status" id='spin'>
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const headers = {
+            'Content-Type': 'application/json'
+        }
+        $(document).ready(function () {
+            $("button.search").click(
+                async function callibm() {
+                    $('pre.result').text('');
+                    $('div#spin').removeClass('invisible');
+                    var url = $('input.inputUrl').val();
+                    // var url = 'http://rel8ed.to'
+                    console.log(url)
+                    var data = { "url": url, "features": { "sentiment": {}, "categories": {}, "concepts": {}, "entities": {}, "keywords": {} } };
+                    var res = await axios({
+                        method: 'post', url: 'https://cors-anywhere.herokuapp.com/https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/4586da57-0316-4d69-b120-8fdfb17acf5a/v1/analyze?version=2019-07-12', data: data, headers: headers, auth: {
+                            username: 'apikey',
+                            password: 'DVGMqRTry3ZNKH8hkmWOYWqrmee7EJWfdLkuKUX7wdIn'
+                        },
+                    });
+                    var nlp = JSON.stringify(res.data, undefined, 4);
+                    console.log(res.data)
+                    $('pre.result').text(nlp)
+                    $('div#spin').addClass('invisible');
+                }
+            );
+            $("button.searchText").click(
+                async function callibmText() {
+                    $('pre.result').text('');
+                    $('div#spin').removeClass('invisible');
+                    var text = $('textarea.inputText').val();
+                    // var url = 'http://rel8ed.to'
+                    console.log(text)
+                    var data = { "text": text, "features": { "sentiment": {}, "categories": {}, "concepts": {}, "entities": {}, "keywords": {} } };
+                    var res = await axios({ method: 'post', url: 'https://cors-anywhere.herokuapp.com/https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/4586da57-0316-4d69-b120-8fdfb17acf5a/v1/analyze?version=2019-07-12', data: data, headers: headers,auth: {
+                            username: 'apikey',
+                            password: 'DVGMqRTry3ZNKH8hkmWOYWqrmee7EJWfdLkuKUX7wdIn'
+                        } });
+                    var nlp = JSON.stringify(res.data, undefined, 4);
+                    console.log(res.data)
+                    $('pre.result').text(nlp)
+                    $('div#spin').addClass('invisible');
+                }
+            );
+
+        });
+        // $(document).ready(function () {
+        //     $('button.search').click(callibm())
+        // }
+        // )
+    </script>
+</body>
+
+</html>

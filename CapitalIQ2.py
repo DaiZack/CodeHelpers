@@ -1,5 +1,5 @@
 from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.chrome import ChromeDriverManager # on linux headless
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -13,16 +13,18 @@ chrome_options.add_argument('--headless')
 def initbrowerser():
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
-    # driver = webdriver.Chrome(ChromeDriverManager().install(),chrome_options=chrome_options)
+    #driver = webdriver.Chrome()  # on windows
+    # driver = webdriver.Chrome(ChromeDriverManager().install(),chrome_options=chrome_options) # first run on linux
     driver = webdriver.Chrome(executable_path='/home/zdai/.wdm/drivers/chromedriver/linux64/81.0.4044.138/chromedriver',chrome_options=chrome_options)
+    
 
     driver.get('https://www.capitaliq.com/')
 
     driver.find_element_by_css_selector("input#username").clear()
-    driver.find_element_by_css_selector("input#username").send_keys('zd15ku@brocku.ca')
+    driver.find_element_by_css_selector("input#username").send_keys(username)
 
     driver.find_element_by_css_selector("input#password").clear()
-    driver.find_element_by_css_selector("input#password").send_keys('Rel8edto')
+    driver.find_element_by_css_selector("input#password").send_keys(password)
 
     driver.find_element_by_css_selector("input#myLoginButton").click()
     delay = 10

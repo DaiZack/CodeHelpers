@@ -5,9 +5,9 @@ driver = Chrome()
 # login
 driver.get('https://www.capitaliq.com/CIQDotNet/my/dashboard.aspx')
 driver.find_element_by_xpath('//input[@name="username"]').clear()
-driver.find_element_by_xpath('//input[@name="username"]').send_keys('zdai@brocku.ca')
+driver.find_element_by_xpath('//input[@name="username"]').send_keys('username')
 driver.find_element_by_xpath('//input[@name="password"]').clear()
-driver.find_element_by_xpath('//input[@name="password"]').send_keys('Rel8ed.to')
+driver.find_element_by_xpath('//input[@name="password"]').send_keys('password')
 driver.find_element_by_xpath('//input[@name="myLoginButton"]').click()
 time.sleep(5)
 

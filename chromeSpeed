@@ -1,0 +1,11 @@
+https://www.youtube.com/watch?v=pWzc4gGYgE0
+
+cmd in administrator
+
+ ipconfig /flushdns 
+ netsh winsock reset
+
+privacy - > cookie
+  Send a "Do Not Track" request with your browsing traffic
+
+  Preload pages for faster browsing and searching

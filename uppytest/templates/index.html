@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Uppy</title>
+    <link href="https://releases.transloadit.com/uppy/v2.4.1/uppy.min.css" rel="stylesheet">
+  </head>
+  <body>
+      <label for="name"></label>
+      <input type="text" name="name" id="name">
+    <div id="drag-drop-area"></div>
+
+    <script src="https://releases.transloadit.com/uppy/v2.4.1/uppy.min.js"></script>
+    <script>
+      var uppy = new Uppy.Core()
+        .use(Uppy.Dashboard, {
+          inline: true,
+          target: '#drag-drop-area',
+          formData: true,
+          height: 300,
+          width:300,
+
+
+        })
+        .use(Uppy.XHRUpload, {endpoint: 'http://localhost:5432'})
+
+      uppy.on('upload', function () {
+        uppy.setMeta({
+          'name': document.getElementById('name').value,
+        })
+      })
+      uppy.on('upload-success', (file, response) => {
+        console.log(response)
+      })
+    
+    </script>
+  </body>
+</html>
